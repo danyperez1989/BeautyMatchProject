@@ -62,7 +62,6 @@ if (loginBtnFinal) {
 
         signInWithEmailAndPassword(auth, email, pass)
             .then(() => {
-                alert("¡Bienvenido!");
                 location.reload();
             })
             .catch(e => alert("Error: " + e.message));
@@ -871,23 +870,66 @@ let ratingSeleccionado = 0;
 // Delegación de eventos: Escuchamos en el documento para que nunca se pierda
 document.addEventListener('click', function (e) {
     // Si el usuario hace click en una estrella
-    if (e.target.classList.contains('star')) {
-        const valor = parseInt(e.target.getAttribute('data-value'));
-        ratingSeleccionado = valor;
+        if (e.target.classList.contains('star')) {
+        ratingTemporal = parseInt(e.target.getAttribute('data-value'));
 
-        // Pintamos las estrellas
+        // Pintamos las estrellas visualmente para que el usuario vea su selección
         const todasLasEstrellas = document.querySelectorAll('.star');
         todasLasEstrellas.forEach(s => {
-            const v = parseInt(s.getAttribute('data-value'));
-            if (v <= valor) {
+            if (parseInt(s.getAttribute('data-value')) <= ratingTemporal) {
                 s.classList.add('active');
+                s.style.color = '#FFD700'; // Dorado
             } else {
                 s.classList.remove('active');
+                s.style.color = '#ccc'; // Gris
             }
         });
-        console.log("Calificación seleccionada:", ratingSeleccionado);
+        console.log("Calificación seleccionada temporalmente:", ratingTemporal);
     }
 
+    if (e.target.id === 'save-review-btn') {
+        const reviewText = document.getElementById('review-text').value;
+        const productName = document.getElementById('modal-product-name').innerText;
+
+        // Validamos que haya marcado estrellas
+        if (ratingTemporal === 0) {
+            alert("Por favor, selecciona una calificación con las estrellas antes de guardar.");
+            return;
+        }
+
+        // LLAMADA A FIREBASE
+        guardarEnFirebase(productName, ratingTemporal, reviewText);
+    }
+
+async function guardarEnFirebase(producto, estrellas, comentario) {
+    try {
+        await db.collection("reviews").add({
+            product: producto,
+            rating: estrellas,
+            comment: comentario,
+            date: new Date().toISOString(),
+            user: auth.currentUser ? auth.currentUser.email : "Anónimo"
+        });
+        
+        alert("¡Reseña guardada con éxito!");
+        limpiarFormularioResena();
+        
+    } catch (error) {
+        console.error("Error al guardar:", error);
+        alert("Hubo un problema al guardar tu reseña.");
+    }
+}
+
+
+function limpiarFormularioResena() {
+    document.getElementById('review-text').value = "";
+    ratingTemporal = 0;
+    document.querySelectorAll('.star').forEach(s => {
+        s.classList.remove('active');
+        s.style.color = '#ccc';
+    });
+}
+    /*
     // Si el usuario hace click en el botón de enviar
     if (e.target.id === 'btn-enviar-resena') {
         const titulo = document.getElementById('review-title').value;
@@ -907,7 +949,7 @@ document.addEventListener('click', function (e) {
         document.getElementById('review-text').value = "";
         ratingSeleccionado = 0;
         document.querySelectorAll('.star').forEach(s => s.classList.remove('active'));
-    }
+    }-*/
 });
 document.getElementById('close-modal').onclick = () => document.getElementById('product-modal').classList.add('hidden');
 document.getElementById('logout-btn').onclick = () => signOut(auth).then(() => location.reload());
