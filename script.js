@@ -898,68 +898,109 @@ function inicializarEstrellas() {
 }
 let ratingTemporal = 0;
 
-
-
-document.addEventListener('click', function (e) {
-    // Si toca una estrella
+document.addEventListener('click', async function (e) {
+    // 1. Lógica de Estrellas
     if (e.target.classList.contains('star')) {
         ratingTemporal = parseInt(e.target.getAttribute('data-value'));
         document.querySelectorAll('.star').forEach(s => {
             s.style.color = parseInt(s.dataset.value) <= ratingTemporal ? '#FFD700' : '#ccc';
         });
+        console.log("Calificación lista:", ratingTemporal);
         return;
     }
 
-    // Si toca el botón de guardar
+    // 2. Lógica del Botón de Guardar (Todo en uno)
     if (e.target.id === 'save-review-btn') {
-        const txtArea = document.getElementById('review-text');
-        const productTitle = document.getElementById('modal-product-name');
+        e.preventDefault();
 
-        if (!txtArea || !productTitle) {
-            console.error("No se encontraron los campos necesarios en el HTML");
+        const inputTexto = document.getElementById('review-text');
+        const inputNombre = document.getElementById('modal-product-name');
+
+        console.log("Textareas encontrados:", document.querySelectorAll('textarea').length) ;
+
+        const miTexto = document.querySelector('textarea'); 
+        console.log("Contenido capturado:", miTexto ? miTexto.value : "NO EXISTE TEXTAREA");
+
+console.log("--- AUDITORÍA DE TEXTAREAS ---");
+    const todosLosTextareas = document.querySelectorAll('textarea');
+    
+    todosLosTextareas.forEach((txt, index) => {
+        console.log(`Textarea #${index}:`, {
+            id: txt.id,
+            clase: txt.className,
+            valorActual: txt.value,
+            visible: txt.offsetParent !== null // Nos dice si se ve en pantalla
+        });
+    });
+    console.log("------------------------------");
+
+        if (!inputTexto || !inputNombre) {
+            console.error("Error: Elementos no encontrados.");
             return;
         }
+
+        const reviewText = inputTexto.value.trim();
+        const productName = inputNombre.innerText;
 
         if (ratingTemporal === 0) {
-            alert("Selecciona las estrellas primero");
+            alert("Por favor, selecciona las estrellas antes de guardar.");
             return;
         }
 
-        guardarEnFirebase(productTitle.innerText, ratingTemporal, txtArea.value);
+        // Ejecutamos el guardado directamente aquí
+        try {
+            console.log("Iniciando guardado en Firebase para:", productName);
+
+            // Importante: Asegúrate que 'addDoc', 'collection' y 'db' estén disponibles
+            await addDoc(collection(db, "reviews"), {
+                product: productName,
+                rating: ratingTemporal,
+                comment: reviewText,
+                date: new Date().toISOString()
+            });
+
+            alert("¡Reseña guardada con éxito!");
+            
+            // Limpiar formulario
+            inputTexto.value = "";
+            ratingTemporal = 0;
+            document.querySelectorAll('.star').forEach(s => s.style.color = '#ccc');
+
+        } catch (error) {
+            console.error("Error al guardar:", error);
+            alert("Hubo un error al guardar: " + error.message);
+        }
     }
 });
+
+// Función de guardado con Sintaxis Modular (Firebase v9/v10)
 async function guardarResenaEnFirebase(producto, estrellas, comentario) {
     try {
-        console.log("Iniciando guardado modular...");
-
-        // Referencia a la colección 'reviews' (Formato Modular)
-        const reviewsRef = collection(db, "reviews");
+        console.log("Guardando...");
         
-        await addDoc(reviewsRef, {
+        // SINTAXIS CORRECTA: addDoc(collection(db, "nombre"), {datos})
+        const docRef = await addDoc(collection(db, "reviews"), {
             product: producto,
             rating: estrellas,
             comment: comentario,
-            date: new Date().toISOString() // O puedes usar serverTimestamp()
+            date: new Date().toISOString(),
+            user: (typeof auth !== 'undefined' && auth.currentUser) ? auth.currentUser.email : "Anónimo"
         });
 
-        // Opcional: Si también quieres actualizar el promedio global en 'ratings'
-        const ratingDocRef = doc(db, "ratings", producto);
-        await setDoc(ratingDocRef, { 
-            suma: increment(estrellas), 
-            votos: increment(1) 
-        }, { merge: true });
-
-        alert("¡Reseña guardada con éxito!");
+        console.log("Guardado con ID:", docRef.id);
+        alert("¡Tu reseña se ha guardado correctamente!");
         
-        // Limpiar formulario
-        const txtArea = document.getElementById('review-text') || document.querySelector('textarea');
-        if (txtArea) txtArea.value = "";
+        // Limpiamos la interfaz
+        document.getElementById('review-text').value = "";
         ratingTemporal = 0;
-        document.querySelectorAll('.star').forEach(s => s.style.color = '#ccc');
+        document.querySelectorAll('.star').forEach(s => {
+            s.classList.remove('active');
+            s.style.color = '#ccc';
+        });
 
     } catch (error) {
-        console.error("Error al guardar en Firebase:", error);
-        alert("Error de conexión: " + error.message);
+        console.error("Error al guardar:", error);
+        alert("Error de Firebase: " + error.message);
     }
 }
 document.getElementById('close-modal').onclick = () => document.getElementById('product-modal').classList.add('hidden');
