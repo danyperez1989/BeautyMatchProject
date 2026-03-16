@@ -31,7 +31,7 @@ const provider = new GoogleAuthProvider();
 window.loginConGoogle = () => {
     signInWithPopup(auth, provider)
         .then((result) => {
-            alert("¡Bienvenido!");
+
             location.reload();
         }).catch((error) => {
             console.error("Error en Google:", error);
@@ -575,8 +575,8 @@ document.getElementById('save-product-btn').onclick = async () => {
         img: imgInput.value,
         link: linkInput.value || "#",
         macro: "maquillaje", // Forzamos minúscula para que coincida con tus botones
-        category: "eye",     // Traducimos 'Ojos' a 'eye' que es tu filtro
-        estacion: "invierno", // Asegúrate de tener un selector para esto o forzarlo
+        category: "ojos",     // Traducimos 'Ojos' a 'eye' que es tu filtro
+        estacion: "Invierno", // Asegúrate de tener un selector para esto o forzarlo
         desc: descInput.value || ""
     };
 
