@@ -10,7 +10,7 @@ import {
     signInWithPopup,
     onAuthStateChanged // <--- AGREGA ESTO AQUÍ
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-
+let selectedRating = 0;
 const firebaseConfig = {
     apiKey: "AIzaSyDM6UZD5UDaM4gaAlTXvdVtDFQmqFm6Irg",
     authDomain: "beautymatchproject.firebaseapp.com",
@@ -310,8 +310,18 @@ async function abrirModal(p, id) {
     document.getElementById('product-modal').classList.remove('hidden');
 }
 function marcarEstrellas(stars, valor) {
-    stars.forEach(s => s.classList.toggle('active', s.dataset.value <= valor));
-}
+stars.forEach(star => {
+    star.addEventListener('click', () => {
+        selectedRating = parseInt(star.getAttribute('data-value'));
+        
+        // Solo pintamos las estrellas de color dorado
+        stars.forEach(s => {
+            s.classList.toggle('active', s.getAttribute('data-value') <= selectedRating);
+            s.style.color = s.getAttribute('data-value') <= selectedRating ? '#ffcc00' : '#ccc';
+        });
+        console.log("Rating seleccionado temporalmente:", selectedRating);
+    });
+});}
 
 const closeBtn = document.querySelector('.close');
 const modal = document.getElementById('product-modal');
@@ -479,31 +489,23 @@ if (regBtnFinal) {
 
 });
 
-
+let calificacionSeleccionada = 0;
 function activarClicks(stars, productoId, votoRef) {
     stars.forEach(s => {
-        s.onclick = async () => {
-            const val = parseInt(s.dataset.value);
-            marcarEstrellas(stars, val);
+        s.onclick = () => {
+            // 1. Solo capturamos el valor en la variable
+            calificacionSeleccionada = parseInt(s.dataset.value);
             
-            try {
-                // 1. Guardamos el voto individual para bloquear futuros intentos
-                await setDoc(votoRef, { valor: val, fecha: new Date() });
-
-                // 2. Actualizamos el promedio global
-                await setDoc(doc(db, "ratings", productoId), { 
-                    suma: increment(val), 
-                    votos: increment(1) 
-                }, { merge: true });
-
-                document.getElementById('rating-msg').innerText = "¡Voto registrado!";
-                desactivarClicks(stars);
-                cargarRatingGlobal(productoId);
-                document.getElementById('review-form').classList.remove('hidden');
-                prepararEnvioReview(productoId, votoRef);
-            } catch (e) {
-                console.error("Error al votar:", e);
-            }
+            // 2. Solo pintamos las estrellas (efecto visual)
+            marcarEstrellas(stars, calificacionSeleccionada);
+            
+            // 3. Mostramos el formulario de reseña si estaba oculto
+            document.getElementById('review-form').classList.remove('hidden');
+            
+            // 4. Mensaje opcional para el usuario
+            document.getElementById('rating-msg').innerText = "Calificación seleccionada. No olvides guardar tu reseña.";
+            
+            console.log("Calificación lista para guardar:", calificacionSeleccionada);
         };
     });
 }
@@ -621,6 +623,11 @@ document.getElementById('cancel-test-btn').onclick = () => {
 
 function prepararEnvioReview(productoId, votoRef) {
     document.getElementById('save-review-btn').onclick = async () => {
+        if (selectedRating === 0) {
+                alert("Por favor selecciona una calificación");
+                return;
+            }
+
         const titulo = document.getElementById('review-title').value;
         const desc = document.getElementById('review-desc').value;
 
@@ -631,15 +638,24 @@ const userSnap = await getDoc(doc(db, "usuarios", auth.currentUser.uid));
 
         try {
 
+
         await setDoc(votoRef, {
             titulo: titulo,
             comentario: desc,
-            usuario: auth.currentUser.displayName || "Usuario Anónimo"
+            usuario: auth.currentUser.displayName || "Usuario Anónimo",
+            valor: calificacionSeleccionada, fecha: new Date() 
+        }, { merge: true });
+
+        await setDoc(doc(db, "ratings", productoId), { 
+            suma: increment(calificacionSeleccionada), 
+            votos: increment(1) 
         }, { merge: true });
 
         document.getElementById('review-form').classList.add('hidden');
         alert("¡Reseña publicada!");
         cargarReseñas(productoId);
+        desactivarClicks(stars);
+        calificacionSeleccionada = 0;
     }catch (e) {
             console.error("Error al guardar reseña:", e);
         }
