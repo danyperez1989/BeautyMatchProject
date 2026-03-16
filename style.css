@@ -215,6 +215,22 @@ input, select, textarea { width: 100%; padding: 12px; border: 1px solid #eee; bo
     transform: rotate(90deg); /* Un pequeño giro para que se vea dinámico */
 }
 
+.stars-container {
+    display: flex;
+    gap: 5px;
+    font-size: 35px; /* Hazlas grandes para que sea fácil darles click */
+    cursor: pointer;
+    user-select: none; /* Evita que se seleccione el texto al hacer click rápido */
+}
+
+.star {
+    color: #ccc;
+    transition: color 0.2s;
+}
+
+.star.active {
+    color: #FFD700 !important; /* Dorado brillante */
+}
 .admin-product-item:last-child { border-bottom: none; }
 
 .admin-product-item .info { display: flex; gap: 15px; align-items: center; }

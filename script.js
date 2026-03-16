@@ -866,7 +866,49 @@ function inicializarEstrellas() {
         });
     });
 }
+let ratingSeleccionado = 0;
 
+// Delegación de eventos: Escuchamos en el documento para que nunca se pierda
+document.addEventListener('click', function (e) {
+    // Si el usuario hace click en una estrella
+    if (e.target.classList.contains('star')) {
+        const valor = parseInt(e.target.getAttribute('data-value'));
+        ratingSeleccionado = valor;
+
+        // Pintamos las estrellas
+        const todasLasEstrellas = document.querySelectorAll('.star');
+        todasLasEstrellas.forEach(s => {
+            const v = parseInt(s.getAttribute('data-value'));
+            if (v <= valor) {
+                s.classList.add('active');
+            } else {
+                s.classList.remove('active');
+            }
+        });
+        console.log("Calificación seleccionada:", ratingSeleccionado);
+    }
+
+    // Si el usuario hace click en el botón de enviar
+    if (e.target.id === 'btn-enviar-resena') {
+        const titulo = document.getElementById('review-title').value;
+        const texto = document.getElementById('review-text').value;
+
+        if (ratingSeleccionado === 0) {
+            alert("¡No olvides marcar las estrellas!");
+            return;
+        }
+        
+        // Aquí llamas a tu función de Firebase
+        console.log("Enviando:", { ratingSeleccionado, titulo, texto });
+        alert("Reseña enviada correctamente");
+        
+        // Limpiar después de enviar
+        document.getElementById('review-title').value = "";
+        document.getElementById('review-text').value = "";
+        ratingSeleccionado = 0;
+        document.querySelectorAll('.star').forEach(s => s.classList.remove('active'));
+    }
+});
 document.getElementById('close-modal').onclick = () => document.getElementById('product-modal').classList.add('hidden');
 document.getElementById('logout-btn').onclick = () => signOut(auth).then(() => location.reload());
 document.getElementById('modal-product-info').innerHTML = contenidoProducto;
