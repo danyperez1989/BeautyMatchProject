@@ -906,17 +906,17 @@ document.addEventListener('click', function (e) {
 
     // 2. Lógica del Botón Guardar (Solo entra aquí si el ID coincide)
     if (e.target.id === 'save-review-btn') {
-        const inputTexto = document.getElementById('review-text');
-        const inputNombre = document.getElementById('modal-product-name');
+        const txtArea = document.getElementById('review-text');
+        const productNameElement = document.getElementById('modal-product-name');
 
         // Verificamos que los elementos EXISTAN antes de leer su valor
-        if (!inputTexto || !inputNombre) {
+        if (!txtArea || !productNameElement) {
             console.error("Error: No se encontró el campo de texto o el nombre del producto en el modal.");
             return;
         }
 
-        const reviewText = inputTexto.value;
-        const productName = inputNombre.innerText;
+        const reviewText = txtArea.value;
+        const productName = productNameElement.innerText;
 
         if (ratingTemporal === 0) {
             alert("Por favor, selecciona una calificación con las estrellas antes de guardar.");
