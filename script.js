@@ -848,6 +848,25 @@ if (btnDelete) {
     };
 }       
 
+function inicializarEstrellas() {
+    const estrellas = document.querySelectorAll('.star');
+    estrellas.forEach(estrella => {
+        estrella.addEventListener('click', function() {
+            const valor = this.getAttribute('data-value');
+            
+            // Quitar clase active a todas
+            estrellas.forEach(s => s.style.color = '#ccc');
+            
+            // Poner color a las seleccionadas
+            for (let i = 0; i < valor; i++) {
+                estrellas[i].style.color = '#ffcc00';
+            }
+            // Guardar el valor en una variable global o un input oculto
+            window.calificacionSeleccionada = valor;
+        });
+    });
+}
+
 document.getElementById('close-modal').onclick = () => document.getElementById('product-modal').classList.add('hidden');
 document.getElementById('logout-btn').onclick = () => signOut(auth).then(() => location.reload());
-
+document.getElementById('modal-product-info').innerHTML = contenidoProducto;

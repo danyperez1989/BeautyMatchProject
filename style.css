@@ -201,6 +201,14 @@ input, select, textarea { width: 100%; padding: 12px; border: 1px solid #eee; bo
     z-index: 100;
 }
 
+.feedback-section {
+    display: block !important; /* Forzamos visibilidad */
+    margin-top: 20px;
+    padding: 15px;
+    border-top: 1px solid #eee;
+    clear: both; /* Evita que se monte sobre imágenes flotantes */
+}
+
 .close:hover {
     background: #d81b60; /* El color rosa de tu marca */
     color: white;
