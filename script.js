@@ -494,23 +494,23 @@ if (regBtnFinal) {
 
 let calificacionSeleccionada = 0;
 function activarClicks(stars, productoId, votoRef) {
-    currentStars = stars;
+    // Anotamos los datos globales para que el botón los use después
     currentProductoId = productoId;
     currentVotoRef = votoRef;
 
     stars.forEach(s => {
-        s.onclick = () => {
-            // Solo capturamos el valor y pintamos
+        s.onclick = (e) => {
+            e.preventDefault(); // Evita cualquier comportamiento extraño
             calificacionTemporal = parseInt(s.dataset.value);
+            
+            // Pintar visualmente (usa tu función marcarEstrellas)
             marcarEstrellas(stars, calificacionTemporal);
             
-            // Mostramos el formulario y mensaje
-            document.getElementById('rating-msg').innerText = "Calificación seleccionada: " + calificacionTemporal;
+            document.getElementById('rating-msg').innerText = "Seleccionaste " + calificacionTemporal + " estrellas. ¡No olvides guardar!";
             document.getElementById('review-form').classList.remove('hidden');
         };
     });
 }
-
 
 
 function desactivarClicks(stars) {
@@ -885,91 +885,46 @@ function inicializarEstrellas() {
         });
     });
 }
-let ratingSeleccionado = 0;
+let ratingTemporal = 0;
 
-// Delegación de eventos: Escuchamos en el documento para que nunca se pierda
 document.addEventListener('click', function (e) {
-    // Si el usuario hace click en una estrella
-        if (e.target.classList.contains('star')) {
+    // 1. Lógica de las Estrellas (Esto funciona bien)
+    if (e.target.classList.contains('star')) {
         ratingTemporal = parseInt(e.target.getAttribute('data-value'));
-
-        // Pintamos las estrellas visualmente para que el usuario vea su selección
         const todasLasEstrellas = document.querySelectorAll('.star');
         todasLasEstrellas.forEach(s => {
             if (parseInt(s.getAttribute('data-value')) <= ratingTemporal) {
                 s.classList.add('active');
-                s.style.color = '#FFD700'; // Dorado
+                s.style.color = '#FFD700';
             } else {
                 s.classList.remove('active');
-                s.style.color = '#ccc'; // Gris
+                s.style.color = '#ccc';
             }
         });
-        console.log("Calificación seleccionada temporalmente:", ratingTemporal);
+        return; // Salimos de la función aquí para que no intente leer el 'value' de abajo
     }
 
+    // 2. Lógica del Botón Guardar (Solo entra aquí si el ID coincide)
     if (e.target.id === 'save-review-btn') {
-        const reviewText = document.getElementById('review-text').value;
-        const productName = document.getElementById('modal-product-name').innerText;
+        const inputTexto = document.getElementById('review-text');
+        const inputNombre = document.getElementById('modal-product-name');
 
-        // Validamos que haya marcado estrellas
+        // Verificamos que los elementos EXISTAN antes de leer su valor
+        if (!inputTexto || !inputNombre) {
+            console.error("Error: No se encontró el campo de texto o el nombre del producto en el modal.");
+            return;
+        }
+
+        const reviewText = inputTexto.value;
+        const productName = inputNombre.innerText;
+
         if (ratingTemporal === 0) {
             alert("Por favor, selecciona una calificación con las estrellas antes de guardar.");
             return;
         }
 
-        // LLAMADA A FIREBASE
         guardarEnFirebase(productName, ratingTemporal, reviewText);
     }
-
-async function guardarEnFirebase(producto, estrellas, comentario) {
-    try {
-        await db.collection("reviews").add({
-            product: producto,
-            rating: estrellas,
-            comment: comentario,
-            date: new Date().toISOString(),
-            user: auth.currentUser ? auth.currentUser.email : "Anónimo"
-        });
-        
-        alert("¡Reseña guardada con éxito!");
-        limpiarFormularioResena();
-        
-    } catch (error) {
-        console.error("Error al guardar:", error);
-        alert("Hubo un problema al guardar tu reseña.");
-    }
-}
-
-
-function limpiarFormularioResena() {
-    document.getElementById('review-text').value = "";
-    ratingTemporal = 0;
-    document.querySelectorAll('.star').forEach(s => {
-        s.classList.remove('active');
-        s.style.color = '#ccc';
-    });
-}
-    /*
-    // Si el usuario hace click en el botón de enviar
-    if (e.target.id === 'btn-enviar-resena') {
-        const titulo = document.getElementById('review-title').value;
-        const texto = document.getElementById('review-text').value;
-
-        if (ratingSeleccionado === 0) {
-            alert("¡No olvides marcar las estrellas!");
-            return;
-        }
-        
-        // Aquí llamas a tu función de Firebase
-        console.log("Enviando:", { ratingSeleccionado, titulo, texto });
-        alert("Reseña enviada correctamente");
-        
-        // Limpiar después de enviar
-        document.getElementById('review-title').value = "";
-        document.getElementById('review-text').value = "";
-        ratingSeleccionado = 0;
-        document.querySelectorAll('.star').forEach(s => s.classList.remove('active'));
-    }-*/
 });
 document.getElementById('close-modal').onclick = () => document.getElementById('product-modal').classList.add('hidden');
 document.getElementById('logout-btn').onclick = () => signOut(auth).then(() => location.reload());
