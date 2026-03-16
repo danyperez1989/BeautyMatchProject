@@ -25,7 +25,10 @@ const auth = getAuth();
 const db = getFirestore();
 const provider = new GoogleAuthProvider();
 
-
+let calificacionTemporal = 0;
+let currentVotoRef = null;
+let currentProductoId = null;
+let currentStars = null;
 
 // Para el botón de Google
 window.loginConGoogle = () => {
@@ -491,24 +494,25 @@ if (regBtnFinal) {
 
 let calificacionSeleccionada = 0;
 function activarClicks(stars, productoId, votoRef) {
+    currentStars = stars;
+    currentProductoId = productoId;
+    currentVotoRef = votoRef;
+
     stars.forEach(s => {
         s.onclick = () => {
-            // 1. Solo capturamos el valor en la variable
-            calificacionSeleccionada = parseInt(s.dataset.value);
+            // Solo capturamos el valor y pintamos
+            calificacionTemporal = parseInt(s.dataset.value);
+            marcarEstrellas(stars, calificacionTemporal);
             
-            // 2. Solo pintamos las estrellas (efecto visual)
-            marcarEstrellas(stars, calificacionSeleccionada);
-            
-            // 3. Mostramos el formulario de reseña si estaba oculto
+            // Mostramos el formulario y mensaje
+            document.getElementById('rating-msg').innerText = "Calificación seleccionada: " + calificacionTemporal;
             document.getElementById('review-form').classList.remove('hidden');
-            
-            // 4. Mensaje opcional para el usuario
-            document.getElementById('rating-msg').innerText = "Calificación seleccionada. No olvides guardar tu reseña.";
-            
-            console.log("Calificación lista para guardar:", calificacionSeleccionada);
         };
     });
 }
+
+
+
 function desactivarClicks(stars) {
     stars.forEach(s => s.onclick = null);
 }
@@ -622,44 +626,44 @@ document.getElementById('cancel-test-btn').onclick = () => {
 };
 
 function prepararEnvioReview(productoId, votoRef) {
-    document.getElementById('save-review-btn').onclick = async () => {
-        if (selectedRating === 0) {
-                alert("Por favor selecciona una calificación");
-                return;
-            }
+  document.getElementById('save-review-btn').onclick = async () => {
+    const reviewText = document.getElementById('review-text').value;
 
-        const titulo = document.getElementById('review-title').value;
-        const desc = document.getElementById('review-desc').value;
+    // Validaciones
+    if (calificacionTemporal === 0) {
+        alert("Por favor, selecciona una estrella.");
+        return;
+    }
 
-        if (!titulo || !desc) return alert("Por favor escribe un título y descripción");
+    try {
+        console.log("Guardando en Firebase...");
 
-const userSnap = await getDoc(doc(db, "usuarios", auth.currentUser.uid));
-        const nombreParaMostrar = userSnap.exists() ? userSnap.data().nombre : (auth.currentUser.displayName || "Usuario");
+        // A. Guardamos el voto individual (Bloquea futuros intentos)
+        await setDoc(currentVotoRef, { 
+            valor: calificacionTemporal, 
+            fecha: new Date(),
+            texto: reviewText // Aprovechamos de guardar el texto aquí también
+        });
 
-        try {
-
-
-        await setDoc(votoRef, {
-            titulo: titulo,
-            comentario: desc,
-            usuario: auth.currentUser.displayName || "Usuario Anónimo",
-            valor: calificacionSeleccionada, fecha: new Date() 
-        }, { merge: true });
-
-        await setDoc(doc(db, "ratings", productoId), { 
-            suma: increment(calificacionSeleccionada), 
+        // B. Actualizamos el promedio global
+        await setDoc(doc(db, "ratings", currentProductoId), { 
+            suma: increment(calificacionTemporal), 
             votos: increment(1) 
         }, { merge: true });
 
+        // C. Feedback visual de éxito
+        alert("¡Reseña y calificación guardadas con éxito!");
+        
+        // Limpiamos y cerramos
+        desactivarClicks(currentStars);
         document.getElementById('review-form').classList.add('hidden');
-        alert("¡Reseña publicada!");
-        cargarReseñas(productoId);
-        desactivarClicks(stars);
-        calificacionSeleccionada = 0;
-    }catch (e) {
-            console.error("Error al guardar reseña:", e);
-        }
-    };
+        calificacionTemporal = 0; // Reset para el próximo producto
+        
+    } catch (e) {
+        console.error("Error crítico al guardar:", e);
+        alert("Error al conectar con la base de datos.");
+    }
+};
 }
 
 // NUEVA FUNCIÓN: Leer todas las reseñas del producto
