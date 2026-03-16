@@ -55,60 +55,7 @@
                 <button id="logout-btn" class="logout-button">
                     Cerrar Sesión
                 </button>
-</header>
-            
-            <main>
-                <section id="analysis-section" class="test-container hidden">
-                    <div class="camera-wrapper">
-                        <video id="video" autoplay playsinline></video>
-                        <div class="face-guide"></div>
-                        <div id="scan-line" class="scan-line"></div>
-                    </div>
-                    <div class="test-controls">
-                        <button id="start-btn" class="primary-btn">Activar Cámara</button>
-                        <button id="analyze-btn" class="primary-btn hidden">Comenzar Análisis</button>
-                        <button id="cancel-test-btn" class="primary-btn outline small-btn hidden">Cancelar y Volver</button>
-                    </div>
-                </section>
-
-                <section id="result-screen" class="hidden">
-                    <div class="result-hero">
-                        <div class="hero-content">
-                            <span class="eyebrow">Resultado:</span>
-                            <h2 id="color-result"></h2>
-                            <div id="description-detail"></div>
-                        </div>
-                        <button id="retry-btn" class="primary-btn outline small-btn">Repetir Test</button>
-                    </div>
-
-                    <div class="category-system">
-                        <div class="macro-nav">
-                            <button class="macro-btn active" data-macro="maquillaje">Maquillaje</button>
-                            <button class="macro-btn" data-macro="cosmeticos">Cosméticos</button>
-                        </div>
-
-                        <nav class="sub-nav">
-                            <ul id="sub-maquillaje" class="nav-list">
-                                <li class="nav-item active" data-category="todos">Todos</li>
-                                <li class="nav-item" data-category="ojos">Ojos</li>
-                                <li class="nav-item" data-category="labios">Labios</li>
-                                <li class="nav-item" data-category="rostro">Rostro</li>
-                            </ul>
-
-                            <ul id="sub-cosmeticos" class="nav-list hidden">
-                                <li class="nav-item active" data-category="todos">Todos</li>
-                                <li class="nav-item" data-category="limpieza">Limpieza</li>
-                                <li class="nav-item" data-category="hidratacion">Hidratación</li>
-                                <li class="nav-item" data-category="tratamientos">Tratamientos</li>
-                                <li class="nav-item" data-category="proteccion">Protectores Solares</li>
-                            </ul>
-                        </nav>
-                    </div>
-                    <div id="product-grid" class="full-grid"></div>
-                </section>
-            </main>
-        </div>
-
+    </div>
         <section id="admin-panel" class="screen hidden">
             <div class="result-hero"><h2>Panel Admin</h2><button id="back-to-app" class="primary-btn outline small-btn">Volver</button></div>
             <div class="card admin-form">
@@ -167,6 +114,61 @@
 
 
         </section>
+</header>
+            
+            <main>
+                <section id="analysis-section" class="test-container hidden">
+                    <div class="camera-wrapper">
+                        <video id="video" autoplay playsinline></video>
+                        <div class="face-guide"></div>
+                        <div id="scan-line" class="scan-line"></div>
+                    </div>
+                    <div class="test-controls">
+                        <button id="start-btn" class="primary-btn">Activar Cámara</button>
+                        <button id="analyze-btn" class="primary-btn hidden">Comenzar Análisis</button>
+                        <button id="cancel-test-btn" class="primary-btn outline small-btn hidden">Cancelar y Volver</button>
+                    </div>
+                </section>
+
+                <section id="result-screen" class="hidden">
+                    <div class="result-hero">
+                        <div class="hero-content">
+                            <span class="eyebrow">Resultado:</span>
+                            <h2 id="color-result"></h2>
+                            <div id="description-detail"></div>
+                        </div>
+                        <button id="retry-btn" class="primary-btn outline small-btn">Repetir Test</button>
+                    </div>
+
+                    <div class="category-system">
+                        <div class="macro-nav">
+                            <button class="macro-btn active" data-macro="maquillaje">Maquillaje</button>
+                            <button class="macro-btn" data-macro="cosmeticos">Cosméticos</button>
+                        </div>
+
+                        <nav class="sub-nav">
+                            <ul id="sub-maquillaje" class="nav-list">
+                                <li class="nav-item active" data-category="todos">Todos</li>
+                                <li class="nav-item" data-category="ojos">Ojos</li>
+                                <li class="nav-item" data-category="labios">Labios</li>
+                                <li class="nav-item" data-category="rostro">Rostro</li>
+                            </ul>
+
+                            <ul id="sub-cosmeticos" class="nav-list hidden">
+                                <li class="nav-item active" data-category="todos">Todos</li>
+                                <li class="nav-item" data-category="limpieza">Limpieza</li>
+                                <li class="nav-item" data-category="hidratacion">Hidratación</li>
+                                <li class="nav-item" data-category="tratamientos">Tratamientos</li>
+                                <li class="nav-item" data-category="proteccion">Protectores Solares</li>
+                            </ul>
+                        </nav>
+                    </div>
+                    <div id="product-grid" class="full-grid"></div>
+                </section>
+            </main>
+        </div>
+
+        
     </div>
 
     <div id="product-modal" class="modal hidden">
