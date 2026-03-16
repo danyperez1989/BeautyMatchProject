@@ -1,5 +1,16 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import {getFirestore, doc, setDoc, getDoc, collection, addDoc, getDocs, query, where, increment, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import {
+    getFirestore, 
+    doc, 
+    setDoc, 
+    getDoc, 
+    collection, 
+    addDoc, 
+    getDocs, 
+    query, 
+    where, 
+    increment, 
+    deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 // Agrega 'onAuthStateChanged' a la lista
 import { 
     getAuth, 
@@ -887,45 +898,70 @@ function inicializarEstrellas() {
 }
 let ratingTemporal = 0;
 
+
+
 document.addEventListener('click', function (e) {
-    // 1. Lógica de las Estrellas (Esto funciona bien)
+    // Si toca una estrella
     if (e.target.classList.contains('star')) {
         ratingTemporal = parseInt(e.target.getAttribute('data-value'));
-        const todasLasEstrellas = document.querySelectorAll('.star');
-        todasLasEstrellas.forEach(s => {
-            if (parseInt(s.getAttribute('data-value')) <= ratingTemporal) {
-                s.classList.add('active');
-                s.style.color = '#FFD700';
-            } else {
-                s.classList.remove('active');
-                s.style.color = '#ccc';
-            }
+        document.querySelectorAll('.star').forEach(s => {
+            s.style.color = parseInt(s.dataset.value) <= ratingTemporal ? '#FFD700' : '#ccc';
         });
-        return; // Salimos de la función aquí para que no intente leer el 'value' de abajo
+        return;
     }
 
-    // 2. Lógica del Botón Guardar (Solo entra aquí si el ID coincide)
+    // Si toca el botón de guardar
     if (e.target.id === 'save-review-btn') {
         const txtArea = document.getElementById('review-text');
-        const productNameElement = document.getElementById('modal-product-name');
+        const productTitle = document.getElementById('modal-product-name');
 
-        // Verificamos que los elementos EXISTAN antes de leer su valor
-        if (!txtArea || !productNameElement) {
-            console.error("Error: No se encontró el campo de texto o el nombre del producto en el modal.");
+        if (!txtArea || !productTitle) {
+            console.error("No se encontraron los campos necesarios en el HTML");
             return;
         }
-
-        const reviewText = txtArea.value;
-        const productName = productNameElement.innerText;
 
         if (ratingTemporal === 0) {
-            alert("Por favor, selecciona una calificación con las estrellas antes de guardar.");
+            alert("Selecciona las estrellas primero");
             return;
         }
 
-        guardarEnFirebase(productName, ratingTemporal, reviewText);
+        guardarEnFirebase(productTitle.innerText, ratingTemporal, txtArea.value);
     }
 });
+async function guardarResenaEnFirebase(producto, estrellas, comentario) {
+    try {
+        console.log("Iniciando guardado modular...");
+
+        // Referencia a la colección 'reviews' (Formato Modular)
+        const reviewsRef = collection(db, "reviews");
+        
+        await addDoc(reviewsRef, {
+            product: producto,
+            rating: estrellas,
+            comment: comentario,
+            date: new Date().toISOString() // O puedes usar serverTimestamp()
+        });
+
+        // Opcional: Si también quieres actualizar el promedio global en 'ratings'
+        const ratingDocRef = doc(db, "ratings", producto);
+        await setDoc(ratingDocRef, { 
+            suma: increment(estrellas), 
+            votos: increment(1) 
+        }, { merge: true });
+
+        alert("¡Reseña guardada con éxito!");
+        
+        // Limpiar formulario
+        const txtArea = document.getElementById('review-text') || document.querySelector('textarea');
+        if (txtArea) txtArea.value = "";
+        ratingTemporal = 0;
+        document.querySelectorAll('.star').forEach(s => s.style.color = '#ccc');
+
+    } catch (error) {
+        console.error("Error al guardar en Firebase:", error);
+        alert("Error de conexión: " + error.message);
+    }
+}
 document.getElementById('close-modal').onclick = () => document.getElementById('product-modal').classList.add('hidden');
 document.getElementById('logout-btn').onclick = () => signOut(auth).then(() => location.reload());
 document.getElementById('modal-product-info').innerHTML = contenidoProducto;
