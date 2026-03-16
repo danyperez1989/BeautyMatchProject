@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BeautyMatch Box - Oficial</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div id="app" class="mobile-view">
+        
+        <div id="login-screen" class="screen">
+            <div class="card">
+                <div class="logo-container">
+                    <img src="imagenes/logo.png" alt="BeautyMatch Box" class="main-logo">
+                </div>
+                <h1>BeautyMatch Box</h1>
+                <p class="subtitle">Tu asistente de belleza inteligente</p>
+
+                <div class="auth-container">
+                <div id="register-fields" class="hidden">
+                        <input type="text" id="name-input" placeholder="Nombre completo">
+                        <input type="text" id="lastname-input" placeholder="Apellido">
+                        <select id="gender-input">
+                            <option value="" disabled selected>Género</option>
+                            <option value="Masculino">Masculino</option>
+                            <option value="Femenino">Femenino</option>
+                        </select>
+                        <input type="number" id="age-input" placeholder="Edad">
+                    </div>
+                    
+                    <input type="email" id="email-input" placeholder="Correo electrónico">
+                    <input type="password" id="password-input" placeholder="Contraseña">
+
+                    <div class="auth-buttons">
+                        <button type="button" id="btn-login-final" class="primary-btn">Entrar</button>
+                        <button type="button" id="btn-register-final" class="primary-btn">Crear Cuenta</button>
+                    </div>
+                    </div>
+                    <div class="divider"><span>o también</span></div>
+                    <button id="google-login-btn" class="social-btn google">
+                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" width="18">
+                        Continuar con Google
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="app-content" class="screen hidden">
+            <header class="main-header">
+                <img src="imagenes/logo.png" alt="Logo" class="mini-logo">
+                <span id="user-display-name">Hola</span>
+                <button id="logout-btn" class="logout-button">
+                    Cerrar Sesión
+                </button>
+</header>
+            
+            <main>
+                <section id="analysis-section" class="test-container hidden">
+                    <div class="camera-wrapper">
+                        <video id="video" autoplay playsinline></video>
+                        <div class="face-guide"></div>
+                        <div id="scan-line" class="scan-line"></div>
+                    </div>
+                    <div class="test-controls">
+                        <button id="start-btn" class="primary-btn">Activar Cámara</button>
+                        <button id="analyze-btn" class="primary-btn hidden">Comenzar Análisis</button>
+                        <button id="cancel-test-btn" class="primary-btn outline small-btn hidden">Cancelar y Volver</button>
+                    </div>
+                </section>
+
+                <section id="result-screen" class="hidden">
+                    <div class="result-hero">
+                        <div class="hero-content">
+                            <span class="eyebrow">Resultado:</span>
+                            <h2 id="color-result"></h2>
+                            <div id="description-detail"></div>
+                        </div>
+                        <button id="retry-btn" class="primary-btn outline small-btn">Repetir Test</button>
+                    </div>
+
+                    <div class="category-system">
+                        <div class="macro-nav">
+                            <button class="macro-btn active" data-macro="maquillaje">Maquillaje</button>
+                            <button class="macro-btn" data-macro="cosmeticos">Cosméticos</button>
+                        </div>
+
+                        <nav class="sub-nav">
+                            <ul id="sub-maquillaje" class="nav-list">
+                                <li class="nav-item active" data-category="todos">Todos</li>
+                                <li class="nav-item" data-category="ojos">Ojos</li>
+                                <li class="nav-item" data-category="labios">Labios</li>
+                                <li class="nav-item" data-category="rostro">Rostro</li>
+                            </ul>
+
+                            <ul id="sub-cosmeticos" class="nav-list hidden">
+                                <li class="nav-item active" data-category="todos">Todos</li>
+                                <li class="nav-item" data-category="limpieza">Limpieza</li>
+                                <li class="nav-item" data-category="hidratacion">Hidratación</li>
+                                <li class="nav-item" data-category="tratamientos">Tratamientos</li>
+                                <li class="nav-item" data-category="proteccion">Protectores Solares</li>
+                            </ul>
+                        </nav>
+                    </div>
+                    <div id="product-grid" class="full-grid"></div>
+                </section>
+            </main>
+        </div>
+
+        <section id="admin-panel" class="screen hidden">
+            <div class="result-hero"><h2>Panel Admin</h2><button id="back-to-app" class="primary-btn outline small-btn">Volver</button></div>
+            <div class="card admin-form">
+                <input type="text" id="admin-nombre" placeholder="Nombre">
+                <input type="text" id="admin-marca" placeholder="Marca">
+                <input type="text" id="admin-precio" placeholder="Precio (S/)">
+                <input type="text" id="admin-img" placeholder="Link Imagen">
+                <input type="text" id="admin-link" placeholder="Link Tienda">
+                <div class="admin-selects">
+                    <label>Categoría Principal:</label>
+                    <select id="admin-macro">
+                        <option value="maquillaje">Maquillaje</option>
+                        <option value="cosmeticos">Cosméticos</option>
+                    </select>
+
+                    <label>Subcategoría:</label>
+                    <select id="admin-category">
+                        <optgroup label="Maquillaje">
+                            <option value="ojos">Ojos</option>
+                            <option value="labios">Labios</option>
+                            <option value="rostro">Rostro</option>
+                        </optgroup>
+                        <optgroup label="Cosméticos">
+                            <option value="limpieza">Limpieza</option>
+                            <option value="hidratacion">Hidratación</option>
+                            <option value="tratamientos">Tratamientos</option>
+                            <option value="proteccion">Protectores Solares</option>
+                        </optgroup>
+                    </select>
+                </div>
+                <textarea id="admin-desc" placeholder="Descripción..."></textarea>
+                <button id="save-product-btn" class="primary-btn">Guardar</button>
+            </div>
+
+            <div class="result-hero">
+                <h2>Panel de Carga Masiva</h2>
+                <button id="back-to-app" class="primary-btn outline small-btn">Volver</button>
+            </div>
+
+            <div class="card admin-form">
+                <label>Pega tu JSON de productos aquí:</label>
+                <textarea id="admin-bulk-json" placeholder='[{"nombre": "Base 1", "marca": "Loreal", ...}, {...}]' style="height: 200px; font-family: monospace; font-size: 12px;"></textarea>
+                
+                <button id="bulk-upload-btn" class="primary-btn" style="background: #2ecc71;">🚀 Subir Todo a Firebase</button>
+                <p id="upload-status" style="text-align: center; margin-top: 10px; font-size: 13px; color: #666; font-weight: 600;"></p>
+
+
+                <div class="divider"><span>O cargar uno solo</span></div>
+            </div>
+
+            <div class="admin-inventory" style="margin-top: 40px;">
+                <h3>Inventario Actual</h3>
+                <div id="admin-product-list" class="admin-table-container">
+                    </div>
+            </div>
+
+
+        </section>
+    </div>
+
+    <div id="product-modal" class="modal hidden">
+        <div class="modal-content">
+
+            <span class="close" id="btn-cerrar-modal">&times;</span>
+            <span id="close-modal" class="close">&times;</span>
+            <span class="close" id="btn-cerrar-modal">&times;</span>
+            <div class="modal-body">
+                <div class="modal-image"><img id="modal-img" src="" alt=""></div>
+                <div class="modal-details">
+                    <span id="modal-brand" class="brand-label"></span>
+                    <h2 id="modal-name"></h2>
+                    <p id="modal-price" class="price-large"></p>
+                    <div class="info-block"><label>Descripción</label><p id="modal-desc"></p></div>
+                    
+                    <div class="rating-block">
+                        <label>Comunidad</label>
+                        <div class="star-rating global" id="global-rating-display">☆☆☆☆☆</div>
+                        <span id="rating-count" style="font-size: 11px; color:#999;">(0 votos)</span>
+                        <label style="margin-top:10px; display:block;">Tu Calificación</label>
+                        <div class="star-rating interactive" id="user-rating-input">
+                            <span class="star" data-value="1">★</span><span class="star" data-value="2">★</span><span class="star" data-value="3">★</span><span class="star" data-value="4">★</span><span class="star" data-value="5">★</span>
+                        </div>
+                        <p id="rating-msg" style="font-size:11px; color:#d81b60;"></p>
+                    
+
+                        <div class="reviews-section" style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 15px;">
+                            <h3>Reseñas de clientes</h3>
+                            
+                            <div id="review-form" class="hidden" style="margin-top: 15px;">
+                                <input type="text" id="review-title" placeholder="Título de tu reseña (ej: ¡Me encantó!)">
+                                <textarea id="review-desc" placeholder="Cuéntanos tu experiencia con este producto..." style="height: 80px;"></textarea>
+                                <button id="save-review-btn" class="primary-btn small-btn" style="width: 100%;">Publicar Comentario</button>
+                            </div>
+
+                            <div id="reviews-list" style="margin-top: 20px; max-height: 250px; overflow-y: auto;">
+                                </div>
+                        </div>
+                    
+                    
+                    </div>
+                         <button id="btn-ver-tienda" class="primary-btn">Ver en Tienda</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="admin-detail-modal" class="modal hidden">
+        <div class="modal-content" style="max-width: 500px; height: auto; padding: 30px;">
+            <span id="close-admin-modal" class="close">&times;</span>
+            <h3 style="margin-bottom: 15px;">Detalles Técnicos (JSON)</h3>
+            <pre id="admin-json-view" style="background: #2d2d2d; color: #75fb4c; padding: 15px; border-radius: 10px; font-size: 12px; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;"></pre>
+            <button id="copy-json-btn" class="primary-btn small-btn" style="margin-top: 15px; width: 100%;">Copiar JSON</button>
+        </div>
+    </div>
+    <script type="module" src="script.js"></script>
+   
+    <!--
+    <button id="delete-all-btn" class="primary-btn" style="background: #ff4757; margin-top: 10px;">
+    ⚠️ Borrar Todo el Inventario
+    </button>
+    -->
+
+</body>
+</html>
