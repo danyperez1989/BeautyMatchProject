@@ -9,6 +9,8 @@ import {
     getDocs, 
     query, 
     where, 
+    orderBy,
+    updateDoc,
     increment, 
     deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 // Agrega 'onAuthStateChanged' a la lista
@@ -30,6 +32,8 @@ const firebaseConfig = {
     messagingSenderId: "55347875666",
     appId: "1:55347875666:web:70af24c088e6c630d7f48b"
 };
+
+
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth();
@@ -81,6 +85,8 @@ if (loginBtnFinal) {
             .catch(e => alert("Error: " + e.message));
     };
 }
+
+
 
 // Función para manejar el Registro (CON LA LÓGICA DE MOSTRAR CAMPOS)
 const regBtnFinal = document.getElementById('btn-register-final');
@@ -910,99 +916,67 @@ document.addEventListener('click', async function (e) {
     }
 
     // 2. Lógica del Botón de Guardar (Todo en uno)
-    if (e.target.id === 'save-review-btn') {
-        e.preventDefault();
+if (e.target.id === 'save-review-btn') {
+    e.preventDefault();
 
-        const inputTexto = document.getElementById('review-text');
-        const inputNombre = document.getElementById('modal-product-name');
-
-        console.log("Textareas encontrados:", document.querySelectorAll('textarea').length) ;
-
-        const miTexto = document.querySelector('textarea'); 
-        console.log("Contenido capturado:", miTexto ? miTexto.value : "NO EXISTE TEXTAREA");
-
-console.log("--- AUDITORÍA DE TEXTAREAS ---");
-    const todosLosTextareas = document.querySelectorAll('textarea');
+    // 1. Localizamos el modal específico donde se hizo clic
+    const modalActivo = e.target.closest('.modal-content') || document.getElementById('product-modal');
     
-    todosLosTextareas.forEach((txt, index) => {
-        console.log(`Textarea #${index}:`, {
-            id: txt.id,
-            clase: txt.className,
-            valorActual: txt.value,
-            visible: txt.offsetParent !== null // Nos dice si se ve en pantalla
-        });
-    });
-    console.log("------------------------------");
+    // 2. Buscamos el textarea y el título DENTRO de ese modal (sin fallos)
+    const inputTexto = modalActivo.querySelector('textarea');
+    const tituloProd = modalActivo.querySelector('h2');
 
-        if (!inputTexto || !inputNombre) {
-            console.error("Error: Elementos no encontrados.");
-            return;
-        }
-
-        const reviewText = inputTexto.value.trim();
-        const productName = inputNombre.innerText;
-
-        if (ratingTemporal === 0) {
-            alert("Por favor, selecciona las estrellas antes de guardar.");
-            return;
-        }
-
-        // Ejecutamos el guardado directamente aquí
-        try {
-            console.log("Iniciando guardado en Firebase para:", productName);
-
-            // Importante: Asegúrate que 'addDoc', 'collection' y 'db' estén disponibles
-            await addDoc(collection(db, "reviews"), {
-                product: productName,
-                rating: ratingTemporal,
-                comment: reviewText,
-                date: new Date().toISOString()
-            });
-
-            alert("¡Reseña guardada con éxito!");
-            
-            // Limpiar formulario
-            inputTexto.value = "";
-            ratingTemporal = 0;
-            document.querySelectorAll('.star').forEach(s => s.style.color = '#ccc');
-
-        } catch (error) {
-            console.error("Error al guardar:", error);
-            alert("Hubo un error al guardar: " + error.message);
-        }
+    if (!inputTexto || !tituloProd) {
+        console.error("No se encontró el formulario. Estructura HTML inválida.");
+        return;
     }
-});
 
-// Función de guardado con Sintaxis Modular (Firebase v9/v10)
-async function guardarResenaEnFirebase(producto, estrellas, comentario) {
+    const valorResena = inputTexto.value.trim();
+    const nombreProducto = tituloProd.innerText;
+
+    // 3. Validamos antes de enviar
+    if (ratingTemporal === 0) {
+        alert("Por favor, selecciona las estrellas antes de guardar.");
+        return;
+    }
+
+    if (valorResena === "") {
+        alert("Escribe un comentario sobre el producto.");
+        return;
+    }
+
+    // 4. Llamamos a la función de guardado (Pasando los datos limpios)
+    ejecutarGuardadoFirebase(nombreProducto, ratingTemporal, valorResena, inputTexto);
+}
+
+async function ejecutarGuardadoFirebase(producto, estrellas, comentario, elementoInput) {
     try {
-        console.log("Guardando...");
-        
-        // SINTAXIS CORRECTA: addDoc(collection(db, "nombre"), {datos})
+        console.log("Iniciando guardado para:", producto);
+
+        // Guardamos en la colección 'reviews'
         const docRef = await addDoc(collection(db, "reviews"), {
             product: producto,
             rating: estrellas,
             comment: comentario,
             date: new Date().toISOString(),
-            user: (typeof auth !== 'undefined' && auth.currentUser) ? auth.currentUser.email : "Anónimo"
+            // Si tienes el sistema de usuarios listo, podrías añadir el email aquí
         });
 
-        console.log("Guardado con ID:", docRef.id);
-        alert("¡Tu reseña se ha guardado correctamente!");
-        
-        // Limpiamos la interfaz
-        document.getElementById('review-text').value = "";
+        console.log("¡Éxito! Reseña guardada con ID:", docRef.id);
+        alert("¡Tu reseña se ha publicado correctamente!");
+
+        // Limpieza de la interfaz
+        elementoInput.value = ""; 
         ratingTemporal = 0;
-        document.querySelectorAll('.star').forEach(s => {
-            s.classList.remove('active');
-            s.style.color = '#ccc';
-        });
+        document.querySelectorAll('.star').forEach(s => s.style.color = '#ccc');
 
     } catch (error) {
-        console.error("Error al guardar:", error);
-        alert("Error de Firebase: " + error.message);
+        console.error("Error al publicar comentario:", error);
+        alert("No se pudo publicar. Revisa tu conexión.");
     }
 }
+
+});
 document.getElementById('close-modal').onclick = () => document.getElementById('product-modal').classList.add('hidden');
 document.getElementById('logout-btn').onclick = () => signOut(auth).then(() => location.reload());
 document.getElementById('modal-product-info').innerHTML = contenidoProducto;

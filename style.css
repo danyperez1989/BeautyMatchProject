@@ -236,6 +236,42 @@ input, select, textarea { width: 100%; padding: 12px; border: 1px solid #eee; bo
     transform: scale(1.2); /* Crece un poquito al pasar el mouse */
 }
 
+.camera-container {
+    position: relative; /* Esto "atrapa" a la línea dentro */
+    width: 100%;
+    max-width: 400px;
+    height: 300px;
+    margin: 0 auto;
+    overflow: hidden; /* Esto corta cualquier cosa que se salga del cuadro */
+    border: 3px solid #e91e63; /* Color de tu marca */
+    border-radius: 10px;
+}
+
+/* El video debe ocupar todo el espacio */
+#camera-preview {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* La línea del scanner */
+.scan-line {
+    position: absolute; /* Absoluto respecto al contenedor */
+    left: 0;
+    width: 100%; /* Ahora el 100% será solo el ancho del contenedor */
+    height: 3px;
+    background: linear-gradient(to right, transparent, #ff00ea, transparent);
+    box-shadow: 0 0 8px #ff00ea;
+    z-index: 5;
+    animation: scanMove 2.5s ease-in-out infinite;
+}
+
+@keyframes scanMove {
+    0% { top: 0%; }
+    100% { top: 100%; }
+}
+
+
 .admin-product-item:last-child { border-bottom: none; }
 
 .admin-product-item .info { display: flex; gap: 15px; align-items: center; }
